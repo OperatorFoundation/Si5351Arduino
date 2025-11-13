@@ -22,18 +22,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-
-#include "Arduino.h"
-#include "Wire.h"
 #include "si5351.h"
 
+#include <stdint.h>
 
 /********************/
 /* Public functions */
 /********************/
 
-Si5351::Si5351(uint8_t i2c_addr):
+Si5351::Si5351(I2C& i2c, uint8_t i2c_addr):
+	i2c(i2c),
 	i2c_bus_addr(i2c_addr)
 {
 	xtal_freq[0] = SI5351_XTAL_FREQ;
@@ -62,13 +60,10 @@ Si5351::Si5351(uint8_t i2c_addr):
  */
 bool Si5351::init(uint8_t xtal_load_c, uint32_t xo_freq, int32_t corr)
 {
-	// Start I2C comms
-	Wire1.begin();
-
 	// Check for a device on the bus, bail out if it is not there
-	Wire1.beginTransmission(i2c_bus_addr);
+	i2c.beginTransmission(i2c_bus_addr);
 	uint8_t reg_val;
-  reg_val = Wire1.endTransmission();
+  reg_val = i2c.endTransmission();
 
 	if(reg_val == 0)
 	{
@@ -1312,37 +1307,37 @@ void Si5351::set_ref_freq(uint32_t ref_freq, enum si5351_pll_input ref_osc)
 
 uint8_t Si5351::si5351_write_bulk(uint8_t addr, uint8_t bytes, uint8_t *data)
 {
-	Wire1.beginTransmission(i2c_bus_addr);
-	Wire1.write(addr);
+	i2c.beginTransmission(i2c_bus_addr);
+	i2c.write(addr);
 	for(int i = 0; i < bytes; i++)
 	{
-		Wire1.write(data[i]);
+		i2c.write(data[i]);
 	}
-	return Wire1.endTransmission();
+	return i2c.endTransmission();
 
 }
 
 uint8_t Si5351::si5351_write(uint8_t addr, uint8_t data)
 {
-	Wire1.beginTransmission(i2c_bus_addr);
-	Wire1.write(addr);
-	Wire1.write(data);
-	return Wire1.endTransmission();
+	i2c.beginTransmission(i2c_bus_addr);
+	i2c.write(addr);
+	i2c.write(data);
+	return i2c.endTransmission();
 }
 
 uint8_t Si5351::si5351_read(uint8_t addr)
 {
 	uint8_t reg_val = 0;
 
-	Wire1.beginTransmission(i2c_bus_addr);
-	Wire1.write(addr);
-	Wire1.endTransmission();
+	i2c.beginTransmission(i2c_bus_addr);
+	i2c.write(addr);
+	i2c.endTransmission();
 
-	Wire1.requestFrom(i2c_bus_addr, (uint8_t)1);
+	i2c.requestFrom(i2c_bus_addr, (uint8_t)1);
 
-	while(Wire1.available())
+	while(i2c.available())
 	{
-		reg_val = Wire1.read();
+		reg_val = i2c.read();
 	}
 
 	return reg_val;

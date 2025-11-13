@@ -17,10 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <flux-cpp.h>
+#include <flux-arduino.h>
+#include <Arduino.h>
+#include <Wire.h>
 #include "si5351.h"
-#include "Wire.h"
 
-Si5351 si5351;
+I2CTwoWire i2c(Wire1);
+Si5351 si5351(i2c);
 
 void setup()
 {
